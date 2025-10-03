@@ -103,6 +103,7 @@ Thumbs.db
 # Project specific
 frontend-backup.zip
 ~$*.docx
+*.docx
 原型开发/
 学生端-待删除/
 
