@@ -1,0 +1,34 @@
+name: Build Teacher UI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install deps
+        working-directory: frontend
+        run: npm ci
+      - name: Build
+        working-directory: frontend
+        run: npm run build
+      - name: Pack dist
+        run: |
+          cd frontend
+          zip -r ../teacher-frontend-dist.zip dist
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: teacher-frontend-dist
+          path: teacher-frontend-dist.zip
