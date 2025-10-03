@@ -1,0 +1,10 @@
+import express from 'express';import cors from 'cors';import bodyParser from 'body-parser';import mysql from 'mysql2/promise';
+const {DB_HOST='127.0.0.1',DB_PORT='3306',DB_USER='root',DB_PASS='',DB_NAME='smart_classroom',PORT='3000'}=process.env;
+const app=express();app.use(cors());app.use(bodyParser.json());
+let pool;async function getPool(){ if(!pool){ pool= mysql.createPool({host:DB_HOST,port:Number(DB_PORT),user:DB_USER,password:DB_PASS,database:DB_NAME,connectionLimit:10}); } return pool; }
+app.get('/health',(req,res)=>res.json({status:'ok',service:'teacher-backend',version:'0.9.0'}));
+app.get('/assignments',async (req,res)=>{const p=await getPool();const [rows]=await p.query('SELECT id,title, DATE_FORMAT(due, "%Y-%m-%d") as due, status FROM assignments ORDER BY id DESC');res.json(rows);});
+app.post('/assignments',async (req,res)=>{const {title,due='2025-10-20',status='进行中'}=req.body||{};if(!title)return res.status(400).json({error:'title required'});const p=await getPool();const [r]=await p.execute('INSERT INTO assignments (title,due,status) VALUES (?,?,?)',[title,due,status]);res.status(201).json({id:r.insertId,title,due,status});});
+app.get('/messages',async (req,res)=>{const p=await getPool();const [rows]=await p.query('SELECT id,text,read_flag as `read` FROM messages ORDER BY id DESC');res.json(rows.map(r=>({...r,read:!!r.read})));});
+app.post('/messages/:id/actions',async (req,res)=>{const id=Number(req.params.id);const {action}=req.body||{};const p=await getPool();if(action==='read'){await p.execute('UPDATE messages SET read_flag=1 WHERE id=?',[id]);return res.json({ok:true});}if(action==='approve'||action==='reject'){await p.execute('INSERT INTO messages (text,read_flag) VALUES (?,0)',['审批动作: '+action+' on message#'+id]);return res.json({ok:true});}res.status(400).json({error:'unknown action'});});
+app.listen(Number(PORT),()=>console.log('[teacher-backend] listening on :'+PORT));

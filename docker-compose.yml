@@ -1,0 +1,37 @@
+version: "3.9"
+services:
+  db:
+    image: mysql:8.0
+    container_name: teacher-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: smart_classroom
+      MYSQL_USER: smart_user
+      MYSQL_PASSWORD: smart_pass
+    ports: ["3306:3306"]
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p$$MYSQL_ROOT_PASSWORD || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  backend:
+    build: { context: ./backend, dockerfile: Dockerfile }
+    container_name: teacher-backend
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_USER: smart_user
+      DB_PASS: smart_pass
+      DB_NAME: smart_classroom
+      PORT: "3000"
+    depends_on: { db: { condition: service_healthy } }
+    ports: ["3000:3000"]
+  frontend:
+    build: { context: ./frontend, dockerfile: Dockerfile }
+    container_name: teacher-frontend
+    environment:
+      VITE_API_BASE: http://backend:3000
+    depends_on: [ backend ]
+    ports: ["5173:5173"]
