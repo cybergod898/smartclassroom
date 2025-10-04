@@ -1,0 +1,2 @@
+将下面对象加入教师侧边菜单数组（紧邻课表/消息等）：
+{ key: 'teaching', label: '我的上课', to: '/teacher/teaching', icon: 'presentation' }

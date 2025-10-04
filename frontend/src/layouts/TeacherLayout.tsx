@@ -8,6 +8,7 @@ import {
   UserOutlined,
   FileDoneOutlined,
   BarChartOutlined,
+  PlayCircleOutlined,
 } from "@ant-design/icons";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
@@ -18,6 +19,7 @@ const items = [
   { key: "/teacher/dashboard", icon: <HomeOutlined />, label: "首页" },
   { key: "/teacher/messages", icon: <BellOutlined />, label: "我的消息" },
   { key: "/teacher/schedule", icon: <CalendarOutlined />, label: "我的课表" },
+  { key: "/teacher/teaching", icon: <PlayCircleOutlined />, label: "我的上课" },
   { key: "/teacher/courses", icon: <FileTextOutlined />, label: "我的备课" },
   { key: "/teacher/assignments", icon: <FileDoneOutlined />, label: "我的作业" },
   { key: "/teacher/grades", icon: <BarChartOutlined />, label: "我的成绩" },
